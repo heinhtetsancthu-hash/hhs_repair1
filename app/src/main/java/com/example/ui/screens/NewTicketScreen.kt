@@ -472,6 +472,38 @@ fun NewTicketScreen(
                     }
                 }
             }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Prominent, beautiful bottom Save button
+            Button(
+                onClick = {
+                    ticketViewModel.saveTicket(user.id)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .testTag("save_ticket_button_bottom"),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF4F46E5),
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Save,
+                    contentDescription = "Save Icon",
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(10.dp))
+                Text(
+                    text = "Save Workorder Ticket",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp
+                )
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
