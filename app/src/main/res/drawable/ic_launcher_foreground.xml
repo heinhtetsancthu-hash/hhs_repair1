@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Outer smartphone frame silhouette -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M38,20 C34,20 32,22 32,26 L32,82 C32,86 34,88 38,88 L70,88 C74,88 76,86 76,82 L76,26 C76,22 74,20 70,20 Z" />
+        
+    <!-- Smartphone active screen area -->
+    <path
+        android:fillColor="#1E1B4B"
+        android:pathData="M35,26 C35,25 36,24 37,24 L71,24 C72,24 73,25 73,26 L73,78 C73,79 72,80 71,80 L37,80 C36,80 35,79 35,78 Z" />
+
+    <!-- Speaker earpiece grid and home button dot -->
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M50,22 L58,22"
+        android:strokeWidth="1.2"
+        android:strokeColor="#94A3B8" />
+    <path
+        android:fillColor="#94A3B8"
+        android:pathData="M54,84 A1.5,1.5 0,1,1 53.99,84 Z" />
+
+    <!-- Highly stylized bold wrench graphic diagonally crossing the screen area -->
+    <path
+        android:fillColor="#38BDF8"
+        android:pathData="M72.5,41.5 L60.5,29.5 C59.2,28.2 57.2,28.2 55.9,29.5 L36.5,48.9 C35.2,50.2 35.2,52.2 36.5,53.5 L40.5,57.5 C41.8,58.8 43.8,58.8 45.1,57.5 L47.5,55.1 C48.1,54.5 49.1,54.5 49.7,55.1 C50.3,55.7 50.3,56.7 49.7,57.3 L47.3,59.7 C46.0,61.0 46.0,63.0 47.3,64.3 L51.3,68.3 C52.6,69.6 54.6,69.6 55.9,68.3 L72.5,51.7 M58.5,37.5 A3,3 0,1,1 58.49,37.5 Z" />
+
+    <!-- Overlay screwdriver/stylus tool intersecting clean styling -->
+    <path
+        android:fillColor="#FCD34D"
+        android:pathData="M43.5,60.5 L68.5,35.5 C69.0,35.0 69.8,35.0 70.3,35.5 C70.8,36.0 70.8,36.8 70.3,37.3 L45.3,62.3 C44.8,62.8 44.0,62.8 43.5,62.3 C43.0,61.8 43.0,61.0 43.5,60.5 Z" />
+
+</vector>

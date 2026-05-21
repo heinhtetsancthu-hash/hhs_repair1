@@ -1,0 +1,6 @@
+{
+  "name": "Mobile Repair Portal",
+  "description": "Secure mobile device repair service portal with local Room database and smart mock cloud synchronization.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
