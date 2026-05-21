@@ -40,6 +40,7 @@ class TicketViewModel(application: Application) : AndroidViewModel(application) 
     var errorType = MutableStateFlow("Screen Damage") // default
     var estimatedCost = MutableStateFlow("")
     var screenLockType = MutableStateFlow("None") // None, Pin, Password, Pattern
+    var screenLockValue = MutableStateFlow("") // Stores pin code, passwords, or pattern sequences (e.g., "1-2-5")
     var includedAccessories = MutableStateFlow(setOf<String>()) // Charger, Battery, Memory Card, Sim Card
     var serviceNotes = MutableStateFlow("")
 
@@ -74,6 +75,7 @@ class TicketViewModel(application: Application) : AndroidViewModel(application) 
         val brand = deviceBrand.value.trim()
         val model = deviceModel.value.trim()
         val lockType = screenLockType.value
+        val lockValue = screenLockValue.value.trim()
         val error = errorType.value
         val costStr = estimatedCost.value.trim()
         val note = serviceNotes.value.trim()
@@ -119,6 +121,7 @@ class TicketViewModel(application: Application) : AndroidViewModel(application) 
             errorType = error,
             estimatedCost = cost,
             screenLockType = lockType,
+            screenLockValue = lockValue,
             includedAccessories = accessoriesString,
             serviceNotes = note,
             status = "Pending",
@@ -164,6 +167,7 @@ class TicketViewModel(application: Application) : AndroidViewModel(application) 
         errorType.value = "Screen Damage"
         estimatedCost.value = ""
         screenLockType.value = "None"
+        screenLockValue.value = ""
         includedAccessories.value = emptySet()
         serviceNotes.value = ""
         _formError.value = null

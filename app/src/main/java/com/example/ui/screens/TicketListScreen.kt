@@ -301,6 +301,23 @@ fun TicketCardItem(
 
                     Spacer(modifier = Modifier.width(12.dp))
 
+                    // Print A5 Workorder Receipt Button
+                    val context = androidx.compose.ui.platform.LocalContext.current
+                    IconButton(
+                        onClick = {
+                            com.example.util.PdfExporter.exportTicketToPdf(context, ticket)
+                        },
+                        modifier = Modifier.size(24.dp).testTag("print_ticket_${ticket.id}")
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Print,
+                            contentDescription = "Print A5 Workorder Ticket",
+                            tint = Color(0xFF4F46E5)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     // Delete Button
                     IconButton(
                         onClick = onDelete,

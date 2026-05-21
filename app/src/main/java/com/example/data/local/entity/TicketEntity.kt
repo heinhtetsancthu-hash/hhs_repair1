@@ -15,6 +15,7 @@ data class TicketEntity(
     val errorType: String,
     val estimatedCost: Double,
     val screenLockType: String, // None, Pin, Password, Pattern
+    val screenLockValue: String = "", // Holds PIN, Password, or Pattern sequence (e.g., "1-2-5-8")
     val includedAccessories: String, // Comma separated string or JSON
     val serviceNotes: String,
     val status: String, // Pending, In Progress, Completed, Delivered

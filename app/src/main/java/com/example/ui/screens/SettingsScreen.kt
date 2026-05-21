@@ -170,6 +170,55 @@ fun SettingsScreen(
             }
 
             // Section 2: Fault types customizer
+            var newFaultName by remember { mutableStateOf("") }
+            var faultToEdit by remember { mutableStateOf<String?>(null) }
+            var editFaultValue by remember { mutableStateOf("") }
+
+            if (faultToEdit != null) {
+                AlertDialog(
+                    onDismissRequest = { faultToEdit = null },
+                    title = { Text("Rename Issue Classification", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column {
+                            Text("Modify the description below for this fault archetype:", fontSize = 13.sp, color = Color(0xFF64748B), modifier = Modifier.padding(bottom = 12.dp))
+                            OutlinedTextField(
+                                value = editFaultValue,
+                                onValueChange = { editFaultValue = it },
+                                label = { Text("Fault Name") },
+                                singleLine = true,
+                                shape = RoundedCornerShape(10.dp),
+                                modifier = Modifier.fillMaxWidth().testTag("edit_fault_name_field")
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                val oldVal = faultToEdit
+                                val newVal = editFaultValue.trim()
+                                if (oldVal != null && newVal.isNotEmpty()) {
+                                    val currentSet = selectedErrorTypes.value.toMutableSet()
+                                    currentSet.remove(oldVal)
+                                    currentSet.add(newVal)
+                                    selectedErrorTypes.value = currentSet
+                                    settings.errorTypes = currentSet
+                                }
+                                faultToEdit = null
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
+                            shape = RoundedCornerShape(8.dp)
+                        ) {
+                            Text("Save", fontWeight = FontWeight.Bold)
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { faultToEdit = null }) {
+                            Text("Cancel", fontWeight = FontWeight.Bold)
+                        }
+                    }
+                )
+            }
+
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,59 +237,131 @@ fun SettingsScreen(
                         modifier = Modifier.padding(bottom = 6.dp)
                     )
                     Text(
-                        text = "Pick which error options appear in the New Ticket selection dropdown:",
+                        text = "Add, edit, or delete the classification choices that populate the New Ticket selection form:",
                         fontSize = 11.sp,
                         color = Color(0xFF64748B),
                         modifier = Modifier.padding(bottom = 16.dp)
                     )
 
-                    val standardFaults = listOf(
-                        "Screen Damage", "Battery Issue", "Charging Port",
-                        "Software Bug", "Water Damage", "Button Fault",
-                        "Camera Repair", "Speaker & Audio", "Network / SIM", "Other"
-                    )
+                    // Add Custom Classifications Form Input
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = newFaultName,
+                            onValueChange = { newFaultName = it },
+                            placeholder = { Text("e.g. Broken Glass Back") },
+                            label = { Text("New Issue/Error Type") },
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(56.dp)
+                                .testTag("new_fault_input_field"),
+                            shape = RoundedCornerShape(10.dp),
+                            singleLine = true
+                        )
 
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        standardFaults.chunked(2).forEach { rowFaults ->
+                        Button(
+                            onClick = {
+                                val newVal = newFaultName.trim()
+                                if (newVal.isNotEmpty()) {
+                                    val currentSet = selectedErrorTypes.value.toMutableSet()
+                                    currentSet.add(newVal)
+                                    selectedErrorTypes.value = currentSet
+                                    settings.errorTypes = currentSet
+                                    newFaultName = ""
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4F46E5)),
+                            shape = RoundedCornerShape(10.dp),
+                            modifier = Modifier
+                                .height(56.dp)
+                                .testTag("add_fault_button")
+                        ) {
+                            Icon(Icons.Default.Add, "Add fault")
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text("Add", fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    // Display active error types list with Edit / Delete actions
+                    val activeErrors = selectedErrorTypes.value.toList().sorted()
+
+                    Column(
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        activeErrors.forEach { fault ->
                             Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(10.dp))
+                                    .clip(RoundedCornerShape(10.dp))
+                                    .background(Color(0xFFF8FAFC))
+                                    .padding(horizontal = 14.dp, vertical = 8.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                rowFaults.forEach { fault ->
-                                    val checked = selectedErrorTypes.value.contains(fault)
-                                    Row(
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(8.dp))
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .clickable {
-                                                val editSet = selectedErrorTypes.value.toMutableSet()
-                                                if (editSet.contains(fault)) {
-                                                    if (editSet.size > 1) { // keep at least 1
-                                                        editSet.remove(fault)
-                                                    }
-                                                } else {
-                                                    editSet.add(fault)
-                                                }
-                                                selectedErrorTypes.value = editSet
-                                                settings.errorTypes = editSet
-                                            }
-                                            .background(if (checked) Color(0xFFEEF2FF) else Color.White)
-                                            .padding(horizontal = 8.dp, vertical = 6.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Checkbox(
-                                            checked = checked,
-                                            onCheckedChange = null, // Custom Row Click Handles This
-                                            colors = CheckboxDefaults.colors(checkedColor = Color(0xFF4F46E5)),
-                                            modifier = Modifier.scale(0.85f)
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Warning,
+                                        contentDescription = "Fault Icon",
+                                        tint = Color(0xFFEF4444),
+                                        modifier = Modifier.size(16.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = fault,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            color = Color(0xFF1E293B)
                                         )
-                                        Text(
-                                            text = fault,
-                                            style = MaterialTheme.typography.bodySmall.copy(
-                                                fontWeight = FontWeight.Medium,
-                                                color = Color(0xFF1E293B)
-                                            )
+                                    )
+                                }
+
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    // Edit (Pencil) Button
+                                    IconButton(
+                                        onClick = {
+                                            faultToEdit = fault
+                                            editFaultValue = fault
+                                        },
+                                        modifier = Modifier.size(32.dp).testTag("edit_fault_$fault")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Edit,
+                                            contentDescription = "Edit issue",
+                                            tint = Color(0xFF4338CA),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+
+                                    // Delete (Trash) Button
+                                    IconButton(
+                                        onClick = {
+                                            val currentSet = selectedErrorTypes.value.toMutableSet()
+                                            if (currentSet.size > 1) { // Guard to keep at least 1
+                                                currentSet.remove(fault)
+                                                selectedErrorTypes.value = currentSet
+                                                settings.errorTypes = currentSet
+                                            }
+                                        },
+                                        modifier = Modifier.size(32.dp).testTag("delete_fault_$fault")
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Delete,
+                                            contentDescription = "Delete issue",
+                                            tint = Color(0xFFEF4444),
+                                            modifier = Modifier.size(16.dp)
                                         )
                                     }
                                 }

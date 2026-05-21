@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -50,7 +51,7 @@ fun NewTicketScreen(
     val formError by ticketViewModel.formError.collectAsStateWithLifecycle()
     val saveSuccess by ticketViewModel.saveSuccess.collectAsStateWithLifecycle()
 
-    val errorsList = remember { settings.errorTypes.toList() }
+    val errorsList = settings.errorTypes.toList().sorted()
     var expandedDropdown by remember { mutableStateOf(false) }
 
     LaunchedEffect(saveSuccess) {
@@ -397,6 +398,137 @@ fun NewTicketScreen(
                                             .height(48.dp)
                                             .background(Color(0xFFCBD5E1))
                                     )
+                                }
+                            }
+                        }
+
+                        // Conditional Security Lock Inputs (PIN/Password / Pattern Node Clicks)
+                        val currentLockVal by ticketViewModel.screenLockValue.collectAsStateWithLifecycle()
+
+                        if (screenLockType == "Pin" || screenLockType == "Password") {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            OutlinedTextField(
+                                value = currentLockVal,
+                                onValueChange = { ticketViewModel.screenLockValue.value = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .testTag("screen_lock_credential_input"),
+                                label = { Text(if (screenLockType == "Pin") "Screen Lock PIN Code" else "Screen Lock Password") },
+                                placeholder = { Text(if (screenLockType == "Pin") "Enter customer's PIN code" else "Enter customer's alphanumeric password") },
+                                shape = RoundedCornerShape(12.dp),
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = if (screenLockType == "Pin") KeyboardType.Number else KeyboardType.Password
+                                )
+                            )
+                        } else if (screenLockType == "Pattern") {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .border(1.dp, Color(0xFFE2E8F0), RoundedCornerShape(12.dp)),
+                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF8FAFC))
+                            ) {
+                                Column(
+                                    modifier = Modifier.padding(16.dp),
+                                    horizontalAlignment = Alignment.CenterHorizontally
+                                ) {
+                                    Text(
+                                        text = "CLICK PATTERN DOTS IN SEQUENCE",
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            color = Color(0xFF64748B),
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 1.2.sp
+                                        ),
+                                        modifier = Modifier.padding(bottom = 12.dp)
+                                    )
+
+                                    val currentNodesList = remember(currentLockVal) {
+                                        if (currentLockVal.isBlank()) emptyList()
+                                        else currentLockVal.split("-").mapNotNull { it.trim().toIntOrNull() }
+                                    }
+
+                                    Column(
+                                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        for (row in 0..2) {
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                for (col in 0..2) {
+                                                    val nodeNum = row * 3 + col + 1
+                                                    val isTapped = currentNodesList.contains(nodeNum)
+                                                    val orderIndex = if (isTapped) currentNodesList.indexOf(nodeNum) + 1 else 0
+
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .size(54.dp)
+                                                            .clip(CircleShape)
+                                                            .border(
+                                                                width = if (isTapped) 3.dp else 1.5.dp,
+                                                                color = if (isTapped) Color(0xFF4F46E5) else Color(0xFF94A3B8),
+                                                                shape = CircleShape
+                                                            )
+                                                            .background(if (isTapped) Color(0xFFEEF2FF) else Color.White)
+                                                            .clickable {
+                                                                if (!isTapped) {
+                                                                    val newList = currentNodesList + nodeNum
+                                                                    ticketViewModel.screenLockValue.value = newList.joinToString("-")
+                                                                }
+                                                            }
+                                                            .testTag("pattern_node_$nodeNum"),
+                                                        contentAlignment = Alignment.Center
+                                                    ) {
+                                                        if (isTapped) {
+                                                            Text(
+                                                                text = orderIndex.toString(),
+                                                                fontWeight = FontWeight.ExtraBold,
+                                                                color = Color(0xFF4F46E5),
+                                                                fontSize = 16.sp
+                                                            )
+                                                        } else {
+                                                            Box(
+                                                                modifier = Modifier
+                                                                    .size(10.dp)
+                                                                    .background(Color(0xFF94A3B8), CircleShape)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(14.dp))
+
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = if (currentNodesList.isEmpty()) "No pattern sequence entered"
+                                            else "Tapped sequence: ${currentNodesList.joinToString(" → ")}",
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 13.sp,
+                                            color = Color(0xFF334155),
+                                            modifier = Modifier.weight(1f)
+                                        )
+
+                                        if (currentNodesList.isNotEmpty()) {
+                                            TextButton(
+                                                onClick = { ticketViewModel.screenLockValue.value = "" },
+                                                colors = ButtonDefaults.textButtonColors(contentColor = Color(0xFFEF4444)),
+                                                modifier = Modifier.testTag("clear_pattern_button")
+                                            ) {
+                                                Icon(Icons.Default.Refresh, "Clear pattern", modifier = Modifier.size(16.dp))
+                                                Spacer(modifier = Modifier.width(4.dp))
+                                                Text("Reset", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

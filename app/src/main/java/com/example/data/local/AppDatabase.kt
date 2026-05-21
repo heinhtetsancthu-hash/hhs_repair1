@@ -9,7 +9,7 @@ import com.example.data.local.dao.UserDao
 import com.example.data.local.entity.TicketEntity
 import com.example.data.local.entity.UserEntity
 
-@Database(entities = [UserEntity::class, TicketEntity::class], version = 1, exportSchema = false)
+@Database(entities = [UserEntity::class, TicketEntity::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun userDao(): UserDao
     abstract fun ticketDao(): TicketDao
